@@ -1577,19 +1577,17 @@ func (m *AccessObject) Validate() error {
 		}
 	}
 
-	if l := utf8.RuneCountInString(m.GetPartitionId()); l < 3 || l > 40 {
-		return AccessObjectValidationError{
-			field:  "PartitionId",
-			reason: "value length must be between 3 and 40 runes, inclusive",
+	if v, ok := interface{}(m.GetPartition()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AccessObjectValidationError{
+				field:  "Partition",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
 		}
 	}
 
-	if !_AccessObject_PartitionId_Pattern.MatchString(m.GetPartitionId()) {
-		return AccessObjectValidationError{
-			field:  "PartitionId",
-			reason: "value does not match regex pattern \"[0-9a-z_-]{3,20}\"",
-		}
-	}
+	// no validation rules for State
 
 	return nil
 }
@@ -1651,8 +1649,6 @@ var _ interface {
 var _AccessObject_AccessId_Pattern = regexp.MustCompile("[0-9a-z_-]{3,20}")
 
 var _AccessObject_ProfileId_Pattern = regexp.MustCompile("[0-9a-z_-]{3,20}")
-
-var _AccessObject_PartitionId_Pattern = regexp.MustCompile("[0-9a-z_-]{3,20}")
 
 // Validate checks the field values on AccessCreateRequest with the rules
 // defined in the proto definition for this message. If any rules are

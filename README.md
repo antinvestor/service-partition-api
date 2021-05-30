@@ -12,5 +12,7 @@ A repository for the partition service api that ants use to group into logical a
         --go_out=./ --validate_out=lang=go:. \
         common/validate.proto common/common.proto partition/v1/partition.proto`
   `protoc --proto_path=../common/service common/common.proto partition/v1/partition.proto --go-grpc_out=./ `
+  
+  You will also need to delete the github file created as that should be imported from the apis project
 
   with that in place update the implementation appropriately
