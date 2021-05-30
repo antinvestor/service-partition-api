@@ -107,6 +107,22 @@ func (partCl *PartitionClient) NewPartition(ctx context.Context, tenantId string
 	return partCl.newPartition(ctx, tenantId, "", name, description, props)
 }
 
+
+// GetPartition Obtains the partition by the id  supplied.
+func (partCl *PartitionClient) GetPartition(ctx context.Context, partitionId string) (*PartitionObject, error) {
+	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*15)
+	defer cancel()
+
+	serviceClient := NewPartitionServiceClient(partCl.clientConn)
+
+	request := PartitionGetRequest{
+		PartitionId:    partitionId,
+	}
+
+	return serviceClient.GetPartition(cancelCtx, &request)
+}
+
+
 // NewChildPartition partitions can have children, for example a bank can have multiple branches
 func (partCl *PartitionClient) NewChildPartition(ctx context.Context, tenantId string, parentId string, name string,
 	description string, props map[string]string) (*PartitionObject, error) {
