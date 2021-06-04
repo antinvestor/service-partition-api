@@ -122,7 +122,22 @@ func (m *TenantRequest) Validate() error {
 		}
 	}
 
-	// no validation rules for Properties
+	for key, val := range m.GetProperties() {
+		_ = val
+
+		// no validation rules for Properties[key]
+
+		if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return TenantRequestValidationError{
+					field:  fmt.Sprintf("Properties[%v]", key),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	return nil
 }
@@ -210,7 +225,22 @@ func (m *TenantObject) Validate() error {
 		}
 	}
 
-	// no validation rules for Properties
+	for key, val := range m.GetProperties() {
+		_ = val
+
+		// no validation rules for Properties[key]
+
+		if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return TenantObjectValidationError{
+					field:  fmt.Sprintf("Properties[%v]", key),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	return nil
 }
@@ -321,7 +351,22 @@ func (m *PartitionCreateRequest) Validate() error {
 		}
 	}
 
-	// no validation rules for Properties
+	for key, val := range m.GetProperties() {
+		_ = val
+
+		// no validation rules for Properties[key]
+
+		if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PartitionCreateRequestValidationError{
+					field:  fmt.Sprintf("Properties[%v]", key),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	return nil
 }
@@ -507,7 +552,22 @@ func (m *PartitionUpdateRequest) Validate() error {
 
 	// no validation rules for State
 
-	// no validation rules for Properties
+	for key, val := range m.GetProperties() {
+		_ = val
+
+		// no validation rules for Properties[key]
+
+		if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PartitionUpdateRequestValidationError{
+					field:  fmt.Sprintf("Properties[%v]", key),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	return nil
 }
@@ -636,7 +696,22 @@ func (m *PartitionObject) Validate() error {
 
 	// no validation rules for State
 
-	// no validation rules for Properties
+	for key, val := range m.GetProperties() {
+		_ = val
+
+		// no validation rules for Properties[key]
+
+		if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PartitionObjectValidationError{
+					field:  fmt.Sprintf("Properties[%v]", key),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	return nil
 }
@@ -836,7 +911,22 @@ func (m *PartitionRoleObject) Validate() error {
 		}
 	}
 
-	// no validation rules for Properties
+	for key, val := range m.GetProperties() {
+		_ = val
+
+		// no validation rules for Properties[key]
+
+		if v, ok := interface{}(val).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PartitionRoleObjectValidationError{
+					field:  fmt.Sprintf("Properties[%v]", key),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
 
 	return nil
 }
