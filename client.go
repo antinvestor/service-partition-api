@@ -277,6 +277,21 @@ func (partCl *PartitionClient) RemoveAccess(ctx context.Context, accessId string
 	return serviceClient.RemoveAccess(cancelCtx, &request)
 }
 
+func (partCl *PartitionClient) GetAccessById(ctx context.Context, accessId string) (*AccessObject, error) {
+
+	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	serviceClient := NewPartitionServiceClient(partCl.clientConn)
+
+	request := AccessGetRequest{
+		AccessId: accessId,
+	}
+
+	return serviceClient.GetAccess(cancelCtx, &request)
+}
+
+
 func (partCl *PartitionClient) GetAccess(ctx context.Context, partitionId string, profileId string) (*AccessObject, error) {
 
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
