@@ -46,6 +46,18 @@ type PartitionClient struct {
 	xMetadata metadata.MD
 }
 
+// InstantiatePartitionsClient creates a new partitions client based on supplied connection
+func InstantiatePartitionsClient(clientConnection *grpc.ClientConn, partitionServiceClient PartitionServiceClient) *PartitionClient {
+
+	cl := &PartitionClient{
+		clientConn: clientConnection,
+		client:    partitionServiceClient ,
+	}
+
+	cl.setClientInfo()
+	return cl
+}
+
 // NewPartitionsClient creates a new partitions client.
 /// The service that an application uses to access and manipulate partition information
 func NewPartitionsClient(ctx context.Context, opts ...apic.ClientOption) (*PartitionClient, error) {
@@ -55,14 +67,10 @@ func NewPartitionsClient(ctx context.Context, opts ...apic.ClientOption) (*Parti
 	if err != nil {
 		return nil, err
 	}
-	cl := &PartitionClient{
-		clientConn: connPool,
-		client:     NewPartitionServiceClient(connPool),
-	}
 
-	cl.setClientInfo()
+	partSvcClient := NewPartitionServiceClient(connPool)
 
-	return cl, nil
+	return InstantiatePartitionsClient(connPool, partSvcClient), nil
 }
 
 // Close closes the connection to the API service. The user should invoke this when
