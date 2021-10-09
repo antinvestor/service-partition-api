@@ -15,7 +15,7 @@ A repository for the partition service api that ants use to group into logical a
 
     `protoc --proto_path=../common/service common/common.proto partition/v1/partition.proto --go-grpc_out=./ `
 
-    `mockgen -source=partition_grpc.pb.go > partition_grpc_mock.go`
+    `mockgen -source=partition_grpc.pb.go -package=partition_v1 -self_package=github.com/antinvestor/service-partition-api -destination=partition_grpc_mock.go`
 
   You will also need to delete the github file created as that should be imported from the apis project
 
