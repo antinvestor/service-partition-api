@@ -669,5 +669,5 @@ var PartitionService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "partition/v1/partition.proto",
+	Metadata: "partition.proto",
 }

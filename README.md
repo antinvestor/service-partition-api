@@ -8,15 +8,11 @@ A repository for the partition service api that ants use to group into logical a
 * To update the proto service you need to run the commands :
 
 
-    `protoc \
-        --proto_path=../common/service \
-        --go_out=./ --validate_out=lang=go:. \
-        common/validate.proto common/common.proto partition/v1/partition.proto`
+    `protoc --proto_path=../apis --proto_path=./v1 --go_out=./ --validate_out=lang=go:. partition.proto`
 
-    `protoc --proto_path=../common/service common/common.proto partition/v1/partition.proto --go-grpc_out=./ `
+    `protoc --proto_path=../apis --proto_path=./v1  partition.proto --go-grpc_out=./ `
+    
+    `mockgen -source=partition_grpc.pb.go -self_package=github.com/antinvestor/service-partition-api -package=partition_v1 -destination=partition_grpc_mock.go`
 
-    `mockgen -source=partition_grpc.pb.go -package=partition_v1 -self_package=github.com/antinvestor/service-partition-api -destination=partition_grpc_mock.go`
-
-  You will also need to delete the github file created as that should be imported from the apis project
 
   with that in place update the implementation appropriately
