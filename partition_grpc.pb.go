@@ -18,8 +18,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PartitionServiceClient interface {
+	// List all tenants in the system matching the query in some way
+	ListTenant(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (PartitionService_ListTenantClient, error)
 	// Log a new tenant request
 	CreateTenant(ctx context.Context, in *TenantRequest, opts ...grpc.CallOption) (*TenantObject, error)
+	// List all tenants in the system matching the query in some way
+	ListPartition(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (PartitionService_ListPartitionClient, error)
 	// Log a new partition request
 	CreatePartition(ctx context.Context, in *PartitionCreateRequest, opts ...grpc.CallOption) (*PartitionObject, error)
 	// Get an existing partition object
@@ -60,6 +64,38 @@ func NewPartitionServiceClient(cc grpc.ClientConnInterface) PartitionServiceClie
 	return &partitionServiceClient{cc}
 }
 
+func (c *partitionServiceClient) ListTenant(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (PartitionService_ListTenantClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PartitionService_ServiceDesc.Streams[0], "/apis.PartitionService/ListTenant", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &partitionServiceListTenantClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type PartitionService_ListTenantClient interface {
+	Recv() (*TenantObject, error)
+	grpc.ClientStream
+}
+
+type partitionServiceListTenantClient struct {
+	grpc.ClientStream
+}
+
+func (x *partitionServiceListTenantClient) Recv() (*TenantObject, error) {
+	m := new(TenantObject)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *partitionServiceClient) CreateTenant(ctx context.Context, in *TenantRequest, opts ...grpc.CallOption) (*TenantObject, error) {
 	out := new(TenantObject)
 	err := c.cc.Invoke(ctx, "/apis.PartitionService/CreateTenant", in, out, opts...)
@@ -67,6 +103,38 @@ func (c *partitionServiceClient) CreateTenant(ctx context.Context, in *TenantReq
 		return nil, err
 	}
 	return out, nil
+}
+
+func (c *partitionServiceClient) ListPartition(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (PartitionService_ListPartitionClient, error) {
+	stream, err := c.cc.NewStream(ctx, &PartitionService_ServiceDesc.Streams[1], "/apis.PartitionService/ListPartition", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &partitionServiceListPartitionClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type PartitionService_ListPartitionClient interface {
+	Recv() (*PartitionObject, error)
+	grpc.ClientStream
+}
+
+type partitionServiceListPartitionClient struct {
+	grpc.ClientStream
+}
+
+func (x *partitionServiceListPartitionClient) Recv() (*PartitionObject, error) {
+	m := new(PartitionObject)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *partitionServiceClient) CreatePartition(ctx context.Context, in *PartitionCreateRequest, opts ...grpc.CallOption) (*PartitionObject, error) {
@@ -208,8 +276,12 @@ func (c *partitionServiceClient) RemoveAccessRole(ctx context.Context, in *Acces
 // All implementations must embed UnimplementedPartitionServiceServer
 // for forward compatibility
 type PartitionServiceServer interface {
+	// List all tenants in the system matching the query in some way
+	ListTenant(*SearchRequest, PartitionService_ListTenantServer) error
 	// Log a new tenant request
 	CreateTenant(context.Context, *TenantRequest) (*TenantObject, error)
+	// List all tenants in the system matching the query in some way
+	ListPartition(*SearchRequest, PartitionService_ListPartitionServer) error
 	// Log a new partition request
 	CreatePartition(context.Context, *PartitionCreateRequest) (*PartitionObject, error)
 	// Get an existing partition object
@@ -247,8 +319,14 @@ type PartitionServiceServer interface {
 type UnimplementedPartitionServiceServer struct {
 }
 
+func (UnimplementedPartitionServiceServer) ListTenant(*SearchRequest, PartitionService_ListTenantServer) error {
+	return status.Errorf(codes.Unimplemented, "method ListTenant not implemented")
+}
 func (UnimplementedPartitionServiceServer) CreateTenant(context.Context, *TenantRequest) (*TenantObject, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateTenant not implemented")
+}
+func (UnimplementedPartitionServiceServer) ListPartition(*SearchRequest, PartitionService_ListPartitionServer) error {
+	return status.Errorf(codes.Unimplemented, "method ListPartition not implemented")
 }
 func (UnimplementedPartitionServiceServer) CreatePartition(context.Context, *PartitionCreateRequest) (*PartitionObject, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePartition not implemented")
@@ -308,6 +386,27 @@ func RegisterPartitionServiceServer(s grpc.ServiceRegistrar, srv PartitionServic
 	s.RegisterService(&PartitionService_ServiceDesc, srv)
 }
 
+func _PartitionService_ListTenant_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SearchRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PartitionServiceServer).ListTenant(m, &partitionServiceListTenantServer{stream})
+}
+
+type PartitionService_ListTenantServer interface {
+	Send(*TenantObject) error
+	grpc.ServerStream
+}
+
+type partitionServiceListTenantServer struct {
+	grpc.ServerStream
+}
+
+func (x *partitionServiceListTenantServer) Send(m *TenantObject) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 func _PartitionService_CreateTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(TenantRequest)
 	if err := dec(in); err != nil {
@@ -324,6 +423,27 @@ func _PartitionService_CreateTenant_Handler(srv interface{}, ctx context.Context
 		return srv.(PartitionServiceServer).CreateTenant(ctx, req.(*TenantRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _PartitionService_ListPartition_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SearchRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(PartitionServiceServer).ListPartition(m, &partitionServiceListPartitionServer{stream})
+}
+
+type PartitionService_ListPartitionServer interface {
+	Send(*PartitionObject) error
+	grpc.ServerStream
+}
+
+type partitionServiceListPartitionServer struct {
+	grpc.ServerStream
+}
+
+func (x *partitionServiceListPartitionServer) Send(m *PartitionObject) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _PartitionService_CreatePartition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -668,6 +788,17 @@ var PartitionService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PartitionService_RemoveAccessRole_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ListTenant",
+			Handler:       _PartitionService_ListTenant_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "ListPartition",
+			Handler:       _PartitionService_ListPartition_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "partition.proto",
 }

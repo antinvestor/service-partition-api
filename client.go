@@ -5,6 +5,7 @@ import (
 	apic "github.com/antinvestor/apis"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"io"
 	"time"
 
 	"math"
@@ -51,7 +52,7 @@ func InstantiatePartitionsClient(clientConnection *grpc.ClientConn, partitionSer
 
 	cl := &PartitionClient{
 		clientConn: clientConnection,
-		client:    partitionServiceClient ,
+		client:     partitionServiceClient,
 	}
 
 	cl.setClientInfo()
@@ -88,6 +89,37 @@ func (partCl *PartitionClient) setClientInfo(keyval ...string) {
 	partCl.xMetadata = metadata.Pairs("x-ai-api-client", apic.XAntHeader(kv...))
 }
 
+// ListTenants gets a list of all the tenants with query filtering against id and properties
+func (partCl *PartitionClient) ListTenants(ctx context.Context, query string, count uint, page uint) ([]*TenantObject, error) {
+
+	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	request := SearchRequest{
+		Query: query,
+		Count: uint32(count),
+		Page:  uint32(page),
+	}
+
+	var tenantList []*TenantObject
+
+	tenantStream, err := partCl.client.ListTenant(cancelCtx, &request)
+	if err != nil {
+		return tenantList, err
+	}
+	for {
+		tenantObj, err := tenantStream.Recv()
+		if err == io.EOF {
+			return tenantList, nil
+		}
+		if err != nil {
+			return tenantList, err
+		}
+
+		tenantList = append(tenantList, tenantObj)
+	}
+}
+
 // NewTenant used to create a new tenant instance.
 // This is a fairly static and infrequently used option that creates an almost physical data separation
 // To allow the use of same databases in a multitentant fashion.
@@ -106,6 +138,37 @@ func (partCl *PartitionClient) NewTenant(ctx context.Context, name string,
 	return partCl.client.CreateTenant(profileCtx, &request)
 }
 
+// ListPartitions obtains partitions tied to the query parameter
+func (partCl *PartitionClient) ListPartitions(ctx context.Context, query string, count uint, page uint) ([]*PartitionObject, error) {
+
+	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	request := SearchRequest{
+		Query: query,
+		Count: uint32(count),
+		Page:  uint32(page),
+	}
+
+	var partitionList []*PartitionObject
+
+	partitions, err := partCl.client.ListPartition(cancelCtx, &request)
+	if err != nil {
+		return partitionList, err
+	}
+	for {
+		partitionObj, err := partitions.Recv()
+		if err == io.EOF {
+			return partitionList, nil
+		}
+		if err != nil {
+			return partitionList, err
+		}
+
+		partitionList = append(partitionList, partitionObj)
+	}
+}
+
 // NewPartition Creates a further logical multitenant environment at a softer level.
 // This separation at the partition level is enforced at the application level that is consuming the api.
 func (partCl *PartitionClient) NewPartition(ctx context.Context, tenantId string, name string, description string,
@@ -113,19 +176,17 @@ func (partCl *PartitionClient) NewPartition(ctx context.Context, tenantId string
 	return partCl.newPartition(ctx, tenantId, "", name, description, props)
 }
 
-
 // GetPartition Obtains the partition by the id  supplied.
 func (partCl *PartitionClient) GetPartition(ctx context.Context, partitionId string) (*PartitionObject, error) {
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
 	request := PartitionGetRequest{
-		PartitionId:    partitionId,
+		PartitionId: partitionId,
 	}
 
 	return partCl.client.GetPartition(cancelCtx, &request)
 }
-
 
 // NewChildPartition partitions can have children, for example a bank can have multiple branches
 func (partCl *PartitionClient) NewChildPartition(ctx context.Context, tenantId string, parentId string, name string,
@@ -150,7 +211,6 @@ func (partCl *PartitionClient) newPartition(ctx context.Context, tenantId string
 	return partCl.client.CreatePartition(cancelCtx, &request)
 }
 
-
 func (partCl *PartitionClient) UpdatePartition(ctx context.Context, partitionId string,
 	name string, description string, props map[string]string) (*PartitionObject, error) {
 
@@ -158,7 +218,7 @@ func (partCl *PartitionClient) UpdatePartition(ctx context.Context, partitionId 
 	defer cancel()
 
 	request := PartitionUpdateRequest{
-		PartitionId:    partitionId,
+		PartitionId: partitionId,
 		Name:        name,
 		Description: description,
 		Properties:  props,
@@ -167,7 +227,6 @@ func (partCl *PartitionClient) UpdatePartition(ctx context.Context, partitionId 
 	return partCl.client.UpdatePartition(cancelCtx, &request)
 }
 
-
 func (partCl *PartitionClient) CreatePartitionRole(ctx context.Context, partitionId string,
 	name string, props map[string]string) (*PartitionRoleObject, error) {
 
@@ -175,8 +234,8 @@ func (partCl *PartitionClient) CreatePartitionRole(ctx context.Context, partitio
 	defer cancel()
 
 	request := PartitionRoleCreateRequest{
-		Name: name,
-		PartitionId:  partitionId,
+		Name:        name,
+		PartitionId: partitionId,
 		Properties:  props,
 	}
 
@@ -201,12 +260,11 @@ func (partCl *PartitionClient) ListPartitionRoles(ctx context.Context, partition
 	defer cancel()
 
 	partitionRoleRequest := PartitionRoleListRequest{
-		PartitionId:  partitionId,
+		PartitionId: partitionId,
 	}
 
 	return partCl.client.ListPartitionRoles(cancelCtx, &partitionRoleRequest)
 }
-
 
 // NewPage a partition has a provision to store custom pages that can be shown to users later.
 // These pages can include signup or customer specified customized pictures
@@ -217,8 +275,8 @@ func (partCl *PartitionClient) NewPage(ctx context.Context, partitionId string, 
 
 	request := PageCreateRequest{
 		Name:        name,
-		Html: html,
-		PartitionId:  partitionId,
+		Html:        html,
+		PartitionId: partitionId,
 	}
 
 	return partCl.client.CreatePage(cancelCtx, &request)
@@ -232,7 +290,7 @@ func (partCl *PartitionClient) GetPage(ctx context.Context, partitionId string, 
 
 	request := PageGetRequest{
 		Name:        name,
-		PartitionId:  partitionId,
+		PartitionId: partitionId,
 	}
 
 	return partCl.client.GetPage(cancelCtx, &request)
@@ -244,8 +302,8 @@ func (partCl *PartitionClient) CreateAccess(ctx context.Context, partitionId str
 	defer cancel()
 
 	request := AccessCreateRequest{
-		ProfileId: profileId,
-		PartitionId:  partitionId,
+		ProfileId:   profileId,
+		PartitionId: partitionId,
 	}
 
 	return partCl.client.CreateAccess(cancelCtx, &request)
@@ -275,20 +333,18 @@ func (partCl *PartitionClient) GetAccessById(ctx context.Context, accessId strin
 	return partCl.client.GetAccess(cancelCtx, &request)
 }
 
-
 func (partCl *PartitionClient) GetAccess(ctx context.Context, partitionId string, profileId string) (*AccessObject, error) {
 
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
 	request := AccessGetRequest{
-		ProfileId: profileId,
-		PartitionId:  partitionId,
+		ProfileId:   profileId,
+		PartitionId: partitionId,
 	}
 
 	return partCl.client.GetAccess(cancelCtx, &request)
 }
-
 
 func (partCl *PartitionClient) CreateAccessRole(ctx context.Context, accessId string, partitionRoleId string) (*AccessRoleObject, error) {
 
@@ -296,8 +352,8 @@ func (partCl *PartitionClient) CreateAccessRole(ctx context.Context, accessId st
 	defer cancel()
 
 	request := AccessRoleCreateRequest{
-		AccessId: accessId,
-		PartitionRoleId:  partitionRoleId,
+		AccessId:        accessId,
+		PartitionRoleId: partitionRoleId,
 	}
 
 	return partCl.client.CreateAccessRole(cancelCtx, &request)

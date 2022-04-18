@@ -2410,3 +2410,97 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = AccessRoleListResponseValidationError{}
+
+// Validate checks the field values on SearchRequest with the rules defined in
+// the proto definition for this message. If any rules are violated, an error
+// is returned.
+func (m *SearchRequest) Validate() error {
+	if m == nil {
+		return nil
+	}
+
+	if l := utf8.RuneCountInString(m.GetQuery()); l < 3 || l > 100 {
+		return SearchRequestValidationError{
+			field:  "Query",
+			reason: "value length must be between 3 and 100 runes, inclusive",
+		}
+	}
+
+	if m.GetCount() != 0 {
+
+		if val := m.GetCount(); val < 5 || val >= 500 {
+			return SearchRequestValidationError{
+				field:  "Count",
+				reason: "value must be inside range [5, 500)",
+			}
+		}
+
+	}
+
+	if m.GetPage() != 0 {
+
+		if m.GetPage() < 1 {
+			return SearchRequestValidationError{
+				field:  "Page",
+				reason: "value must be greater than or equal to 1",
+			}
+		}
+
+	}
+
+	return nil
+}
+
+// SearchRequestValidationError is the validation error returned by
+// SearchRequest.Validate if the designated constraints aren't met.
+type SearchRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e SearchRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e SearchRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e SearchRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e SearchRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e SearchRequestValidationError) ErrorName() string { return "SearchRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e SearchRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sSearchRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = SearchRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = SearchRequestValidationError{}
