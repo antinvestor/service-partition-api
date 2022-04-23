@@ -16,6 +16,7 @@ const ctxKeyService = "partitionClientKey"
 func defaultPartitionClientOptions() []apic.ClientOption {
 	return []apic.ClientOption{
 		apic.WithEndpoint("partitions.api.antinvestor.com:443"),
+		apic.WithScopes("service_partition"),
 		apic.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		apic.WithGRPCDialOption(grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxInt32))),
 	}
@@ -35,7 +36,8 @@ func FromContext(ctx context.Context) *PartitionClient {
 }
 
 // PartitionClient is a client for interacting with the partitions service API.
-// Methods, except Close, may be called concurrently. However, fields must not be modified concurrently with method calls.
+// Methods, except Close, may be called concurrently.
+// However, fields must not be modified concurrently with method calls.
 type PartitionClient struct {
 	// gRPC connection to the service.
 	clientConn *grpc.ClientConn
@@ -48,7 +50,9 @@ type PartitionClient struct {
 }
 
 // InstantiatePartitionsClient creates a new partitions client based on supplied connection
-func InstantiatePartitionsClient(clientConnection *grpc.ClientConn, partitionServiceClient PartitionServiceClient) *PartitionClient {
+func InstantiatePartitionsClient(
+	clientConnection *grpc.ClientConn,
+	partitionServiceClient PartitionServiceClient) *PartitionClient {
 
 	cl := &PartitionClient{
 		clientConn: clientConnection,
@@ -90,7 +94,11 @@ func (partCl *PartitionClient) setClientInfo(keyval ...string) {
 }
 
 // ListTenants gets a list of all the tenants with query filtering against id and properties
-func (partCl *PartitionClient) ListTenants(ctx context.Context, query string, count uint, page uint) ([]*TenantObject, error) {
+func (partCl *PartitionClient) ListTenants(
+	ctx context.Context,
+	query string,
+	count uint,
+	page uint) ([]*TenantObject, error) {
 
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
@@ -139,7 +147,11 @@ func (partCl *PartitionClient) NewTenant(ctx context.Context, name string,
 }
 
 // ListPartitions obtains partitions tied to the query parameter
-func (partCl *PartitionClient) ListPartitions(ctx context.Context, query string, count uint, page uint) ([]*PartitionObject, error) {
+func (partCl *PartitionClient) ListPartitions(
+	ctx context.Context,
+	query string,
+	count uint,
+	page uint) ([]*PartitionObject, error) {
 
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
@@ -254,7 +266,9 @@ func (partCl *PartitionClient) RemovePartitionRole(ctx context.Context, partitio
 	return partCl.client.RemovePartitionRole(cancelCtx, &request)
 }
 
-func (partCl *PartitionClient) ListPartitionRoles(ctx context.Context, partitionId string) (*PartitionRoleListResponse, error) {
+func (partCl *PartitionClient) ListPartitionRoles(
+	ctx context.Context,
+	partitionId string) (*PartitionRoleListResponse, error) {
 
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
@@ -296,7 +310,9 @@ func (partCl *PartitionClient) GetPage(ctx context.Context, partitionId string, 
 	return partCl.client.GetPage(cancelCtx, &request)
 }
 
-func (partCl *PartitionClient) CreateAccess(ctx context.Context, partitionId string, profileId string) (*AccessObject, error) {
+func (partCl *PartitionClient) CreateAccess(
+	ctx context.Context,
+	partitionId string, profileId string) (*AccessObject, error) {
 
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
@@ -333,7 +349,10 @@ func (partCl *PartitionClient) GetAccessById(ctx context.Context, accessId strin
 	return partCl.client.GetAccess(cancelCtx, &request)
 }
 
-func (partCl *PartitionClient) GetAccess(ctx context.Context, partitionId string, profileId string) (*AccessObject, error) {
+func (partCl *PartitionClient) GetAccess(
+	ctx context.Context,
+	partitionId string,
+	profileId string) (*AccessObject, error) {
 
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
@@ -346,7 +365,10 @@ func (partCl *PartitionClient) GetAccess(ctx context.Context, partitionId string
 	return partCl.client.GetAccess(cancelCtx, &request)
 }
 
-func (partCl *PartitionClient) CreateAccessRole(ctx context.Context, accessId string, partitionRoleId string) (*AccessRoleObject, error) {
+func (partCl *PartitionClient) CreateAccessRole(
+	ctx context.Context,
+	accessId string,
+	partitionRoleId string) (*AccessRoleObject, error) {
 
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
