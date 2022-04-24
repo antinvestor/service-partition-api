@@ -1,9 +1,9 @@
 module github.com/antinvestor/service-partition-api
 
-go 1.18
+go 1.17
 
 require (
-	github.com/antinvestor/apis v1.1.5
+	github.com/antinvestor/apis v1.1.6
 	github.com/envoyproxy/protoc-gen-validate v0.6.7
 	github.com/golang/mock v1.6.0
 	google.golang.org/grpc v1.46.0

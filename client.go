@@ -2,6 +2,7 @@ package partition_v1
 
 import (
 	"context"
+	"errors"
 	apic "github.com/antinvestor/apis"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -16,7 +17,8 @@ const ctxKeyService = "partitionClientKey"
 func defaultPartitionClientOptions() []apic.ClientOption {
 	return []apic.ClientOption{
 		apic.WithEndpoint("partitions.api.antinvestor.com:443"),
-		apic.WithScopes("service_partition"),
+		apic.WithAudiences("service_profile"),
+		apic.WithScopes("offline_access"),
 		apic.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		apic.WithGRPCDialOption(grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxInt32))),
 	}
@@ -99,7 +101,6 @@ func (partCl *PartitionClient) ListTenants(
 	query string,
 	count uint,
 	page uint) ([]*TenantObject, error) {
-
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
@@ -117,7 +118,7 @@ func (partCl *PartitionClient) ListTenants(
 	}
 	for {
 		tenantObj, err := tenantStream.Recv()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			return tenantList, nil
 		}
 		if err != nil {
@@ -131,9 +132,11 @@ func (partCl *PartitionClient) ListTenants(
 // NewTenant used to create a new tenant instance.
 // This is a fairly static and infrequently used option that creates an almost physical data separation
 // To allow the use of same databases in a multitentant fashion.
-func (partCl *PartitionClient) NewTenant(ctx context.Context, name string,
-	description string, props map[string]string) (*TenantObject, error) {
-
+func (partCl *PartitionClient) NewTenant(
+	ctx context.Context,
+	name string,
+	description string,
+	props map[string]string) (*TenantObject, error) {
 	profileCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
@@ -152,7 +155,6 @@ func (partCl *PartitionClient) ListPartitions(
 	query string,
 	count uint,
 	page uint) ([]*PartitionObject, error) {
-
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
@@ -170,7 +172,7 @@ func (partCl *PartitionClient) ListPartitions(
 	}
 	for {
 		partitionObj, err := partitions.Recv()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			return partitionList, nil
 		}
 		if err != nil {
