@@ -17,8 +17,6 @@ const ctxKeyService = "partitionClientKey"
 func defaultPartitionClientOptions() []apic.ClientOption {
 	return []apic.ClientOption{
 		apic.WithEndpoint("partitions.api.antinvestor.com:443"),
-		apic.WithAudiences("service_profile"),
-		apic.WithScopes("offline_access"),
 		apic.WithGRPCDialOption(grpc.WithDisableServiceConfig()),
 		apic.WithGRPCDialOption(grpc.WithDefaultCallOptions(grpc.MaxCallRecvMsgSize(math.MaxInt32))),
 	}
