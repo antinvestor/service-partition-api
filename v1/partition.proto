@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-package apis;
-option go_package = ".;partition_v1";
+package partition;
+option go_package = ".;partitionv1";
 
 import "validate.proto";
 import "common.proto";
@@ -151,7 +151,7 @@ message AccessRoleListResponse {
 }
 
 message SearchRequest {
-    string query = 1 [(validate.rules).string = {min_len: 3, max_len: 100}];
+    string query = 1 [(validate.rules).string = {ignore_empty: true, max_len: 100}];
     uint32 count = 2 [(validate.rules).uint32 = {ignore_empty: true, gte:5, lt: 500}];
     uint32 page = 3 [(validate.rules).uint32 = {ignore_empty: true, gte:1}];
 }

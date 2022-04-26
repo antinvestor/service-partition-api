@@ -1,9 +1,10 @@
-package partition_v1
+package partitionv1
 
 import (
 	"context"
-	"github.com/antinvestor/apis"
 	"testing"
+
+	"github.com/antinvestor/apis"
 )
 
 func TestNewProfileClient(t *testing.T) {

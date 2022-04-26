@@ -1,18 +1,19 @@
-package partition_v1
+package partitionv1
 
 import (
 	"context"
 	"errors"
+	"io"
+	"time"
+
 	apic "github.com/antinvestor/apis"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"io"
-	"time"
 
 	"math"
 )
 
-const ctxKeyService = "partitionClientKey"
+var ctxKeyService = apic.CtxServiceKey("partitionClientKey")
 
 func defaultPartitionClientOptions() []apic.ClientOption {
 	return []apic.ClientOption{

@@ -2,7 +2,7 @@
 // Source: partition_grpc.pb.go
 
 // Package partition_v1 is a generated GoMock package.
-package partition_v1
+package partitionv1
 
 import (
 	context "context"
