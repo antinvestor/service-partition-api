@@ -1,4 +1,28 @@
 repos:
+- repo: local
+  hooks:
+    - id: protoc-generate-resources
+      name: Protoc generate resources
+      always_run: true
+      entry: protoc
+      args: ["--proto_path=../apis", "--proto_path=./v1", "--go_out=./", "--validate_out=lang=go:.", "partition.proto"]
+      language: system
+      types: [bash]
+    - id: protoc-generate-servers
+      name: Protoc generate Servers
+      always_run: true
+      entry: protoc
+      args: ["--proto_path=../apis", "--proto_path=./v1", "partition.proto", "--go-grpc_out=./"]
+      language: system
+      types: [bash]
+    - id: protoc-generate-mocks
+      name: Protoc generate Mocks
+      always_run: true
+      entry: mockgen
+      args: ["-source=partition_grpc.pb.go", "-self_package=github.com/antinvestor/service-partition-api", "-package=partitionv1", "-destination=partition_grpc_mock.go"]
+      language: system
+      types: [bash]
+
 - repo: https://github.com/dnephin/pre-commit-golang
   rev: v0.5.0
   hooks:
