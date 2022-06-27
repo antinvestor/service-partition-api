@@ -18,6 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PartitionServiceClient interface {
+	// Get a tenant in the system matching the id
+	GetTenant(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*TenantObject, error)
 	// List all tenants in the system matching the query in some way
 	ListTenant(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (PartitionService_ListTenantClient, error)
 	// Log a new tenant request
@@ -27,7 +29,7 @@ type PartitionServiceClient interface {
 	// Log a new partition request
 	CreatePartition(ctx context.Context, in *PartitionCreateRequest, opts ...grpc.CallOption) (*PartitionObject, error)
 	// Get an existing partition object
-	GetPartition(ctx context.Context, in *PartitionGetRequest, opts ...grpc.CallOption) (*PartitionObject, error)
+	GetPartition(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*PartitionObject, error)
 	// Update an existing partition object
 	UpdatePartition(ctx context.Context, in *PartitionUpdateRequest, opts ...grpc.CallOption) (*PartitionObject, error)
 	// Create a partition Role for a particular partition
@@ -62,6 +64,15 @@ type partitionServiceClient struct {
 
 func NewPartitionServiceClient(cc grpc.ClientConnInterface) PartitionServiceClient {
 	return &partitionServiceClient{cc}
+}
+
+func (c *partitionServiceClient) GetTenant(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*TenantObject, error) {
+	out := new(TenantObject)
+	err := c.cc.Invoke(ctx, "/partition.PartitionService/GetTenant", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *partitionServiceClient) ListTenant(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (PartitionService_ListTenantClient, error) {
@@ -146,7 +157,7 @@ func (c *partitionServiceClient) CreatePartition(ctx context.Context, in *Partit
 	return out, nil
 }
 
-func (c *partitionServiceClient) GetPartition(ctx context.Context, in *PartitionGetRequest, opts ...grpc.CallOption) (*PartitionObject, error) {
+func (c *partitionServiceClient) GetPartition(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*PartitionObject, error) {
 	out := new(PartitionObject)
 	err := c.cc.Invoke(ctx, "/partition.PartitionService/GetPartition", in, out, opts...)
 	if err != nil {
@@ -276,6 +287,8 @@ func (c *partitionServiceClient) RemoveAccessRole(ctx context.Context, in *Acces
 // All implementations must embed UnimplementedPartitionServiceServer
 // for forward compatibility
 type PartitionServiceServer interface {
+	// Get a tenant in the system matching the id
+	GetTenant(context.Context, *GetRequest) (*TenantObject, error)
 	// List all tenants in the system matching the query in some way
 	ListTenant(*SearchRequest, PartitionService_ListTenantServer) error
 	// Log a new tenant request
@@ -285,7 +298,7 @@ type PartitionServiceServer interface {
 	// Log a new partition request
 	CreatePartition(context.Context, *PartitionCreateRequest) (*PartitionObject, error)
 	// Get an existing partition object
-	GetPartition(context.Context, *PartitionGetRequest) (*PartitionObject, error)
+	GetPartition(context.Context, *GetRequest) (*PartitionObject, error)
 	// Update an existing partition object
 	UpdatePartition(context.Context, *PartitionUpdateRequest) (*PartitionObject, error)
 	// Create a partition Role for a particular partition
@@ -319,6 +332,9 @@ type PartitionServiceServer interface {
 type UnimplementedPartitionServiceServer struct {
 }
 
+func (UnimplementedPartitionServiceServer) GetTenant(context.Context, *GetRequest) (*TenantObject, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTenant not implemented")
+}
 func (UnimplementedPartitionServiceServer) ListTenant(*SearchRequest, PartitionService_ListTenantServer) error {
 	return status.Errorf(codes.Unimplemented, "method ListTenant not implemented")
 }
@@ -331,7 +347,7 @@ func (UnimplementedPartitionServiceServer) ListPartition(*SearchRequest, Partiti
 func (UnimplementedPartitionServiceServer) CreatePartition(context.Context, *PartitionCreateRequest) (*PartitionObject, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePartition not implemented")
 }
-func (UnimplementedPartitionServiceServer) GetPartition(context.Context, *PartitionGetRequest) (*PartitionObject, error) {
+func (UnimplementedPartitionServiceServer) GetPartition(context.Context, *GetRequest) (*PartitionObject, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPartition not implemented")
 }
 func (UnimplementedPartitionServiceServer) UpdatePartition(context.Context, *PartitionUpdateRequest) (*PartitionObject, error) {
@@ -384,6 +400,24 @@ type UnsafePartitionServiceServer interface {
 
 func RegisterPartitionServiceServer(s grpc.ServiceRegistrar, srv PartitionServiceServer) {
 	s.RegisterService(&PartitionService_ServiceDesc, srv)
+}
+
+func _PartitionService_GetTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PartitionServiceServer).GetTenant(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/partition.PartitionService/GetTenant",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PartitionServiceServer).GetTenant(ctx, req.(*GetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _PartitionService_ListTenant_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -465,7 +499,7 @@ func _PartitionService_CreatePartition_Handler(srv interface{}, ctx context.Cont
 }
 
 func _PartitionService_GetPartition_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PartitionGetRequest)
+	in := new(GetRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -477,7 +511,7 @@ func _PartitionService_GetPartition_Handler(srv interface{}, ctx context.Context
 		FullMethod: "/partition.PartitionService/GetPartition",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PartitionServiceServer).GetPartition(ctx, req.(*PartitionGetRequest))
+		return srv.(PartitionServiceServer).GetPartition(ctx, req.(*GetRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -723,6 +757,10 @@ var PartitionService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "partition.PartitionService",
 	HandlerType: (*PartitionServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetTenant",
+			Handler:    _PartitionService_GetTenant_Handler,
+		},
 		{
 			MethodName: "CreateTenant",
 			Handler:    _PartitionService_CreateTenant_Handler,

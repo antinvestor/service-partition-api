@@ -396,24 +396,23 @@ var _PartitionCreateRequest_TenantId_Pattern = regexp.MustCompile("[0-9a-z_-]{3,
 
 var _PartitionCreateRequest_ParentId_Pattern = regexp.MustCompile("[0-9a-z_-]{3,20}")
 
-// Validate checks the field values on PartitionGetRequest with the rules
-// defined in the proto definition for this message. If any rules are
-// violated, an error is returned.
-func (m *PartitionGetRequest) Validate() error {
+// Validate checks the field values on GetRequest with the rules defined in the
+// proto definition for this message. If any rules are violated, an error is returned.
+func (m *GetRequest) Validate() error {
 	if m == nil {
 		return nil
 	}
 
-	if l := utf8.RuneCountInString(m.GetPartitionId()); l < 3 || l > 40 {
-		return PartitionGetRequestValidationError{
-			field:  "PartitionId",
+	if l := utf8.RuneCountInString(m.GetId()); l < 3 || l > 40 {
+		return GetRequestValidationError{
+			field:  "Id",
 			reason: "value length must be between 3 and 40 runes, inclusive",
 		}
 	}
 
-	if !_PartitionGetRequest_PartitionId_Pattern.MatchString(m.GetPartitionId()) {
-		return PartitionGetRequestValidationError{
-			field:  "PartitionId",
+	if !_GetRequest_Id_Pattern.MatchString(m.GetId()) {
+		return GetRequestValidationError{
+			field:  "Id",
 			reason: "value does not match regex pattern \"[0-9a-z_-]{3,20}\"",
 		}
 	}
@@ -421,9 +420,9 @@ func (m *PartitionGetRequest) Validate() error {
 	return nil
 }
 
-// PartitionGetRequestValidationError is the validation error returned by
-// PartitionGetRequest.Validate if the designated constraints aren't met.
-type PartitionGetRequestValidationError struct {
+// GetRequestValidationError is the validation error returned by
+// GetRequest.Validate if the designated constraints aren't met.
+type GetRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -431,24 +430,22 @@ type PartitionGetRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e PartitionGetRequestValidationError) Field() string { return e.field }
+func (e GetRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e PartitionGetRequestValidationError) Reason() string { return e.reason }
+func (e GetRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e PartitionGetRequestValidationError) Cause() error { return e.cause }
+func (e GetRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e PartitionGetRequestValidationError) Key() bool { return e.key }
+func (e GetRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e PartitionGetRequestValidationError) ErrorName() string {
-	return "PartitionGetRequestValidationError"
-}
+func (e GetRequestValidationError) ErrorName() string { return "GetRequestValidationError" }
 
 // Error satisfies the builtin error interface
-func (e PartitionGetRequestValidationError) Error() string {
+func (e GetRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -460,14 +457,14 @@ func (e PartitionGetRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sPartitionGetRequest.%s: %s%s",
+		"invalid %sGetRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = PartitionGetRequestValidationError{}
+var _ error = GetRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -475,9 +472,9 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = PartitionGetRequestValidationError{}
+} = GetRequestValidationError{}
 
-var _PartitionGetRequest_PartitionId_Pattern = regexp.MustCompile("[0-9a-z_-]{3,20}")
+var _GetRequest_Id_Pattern = regexp.MustCompile("[0-9a-z_-]{3,20}")
 
 // Validate checks the field values on PartitionUpdateRequest with the rules
 // defined in the proto definition for this message. If any rules are

@@ -197,7 +197,7 @@ func (mr *MockPartitionServiceClientMockRecorder) GetPage(ctx, in interface{}, o
 }
 
 // GetPartition mocks base method.
-func (m *MockPartitionServiceClient) GetPartition(ctx context.Context, in *PartitionGetRequest, opts ...grpc.CallOption) (*PartitionObject, error) {
+func (m *MockPartitionServiceClient) GetPartition(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*PartitionObject, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
@@ -214,6 +214,26 @@ func (mr *MockPartitionServiceClientMockRecorder) GetPartition(ctx, in interface
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPartition", reflect.TypeOf((*MockPartitionServiceClient)(nil).GetPartition), varargs...)
+}
+
+// GetTenant mocks base method.
+func (m *MockPartitionServiceClient) GetTenant(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*TenantObject, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetTenant", varargs...)
+	ret0, _ := ret[0].(*TenantObject)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTenant indicates an expected call of GetTenant.
+func (mr *MockPartitionServiceClientMockRecorder) GetTenant(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTenant", reflect.TypeOf((*MockPartitionServiceClient)(nil).GetTenant), varargs...)
 }
 
 // ListAccessRoles mocks base method.
@@ -786,7 +806,7 @@ func (mr *MockPartitionServiceServerMockRecorder) GetPage(arg0, arg1 interface{}
 }
 
 // GetPartition mocks base method.
-func (m *MockPartitionServiceServer) GetPartition(arg0 context.Context, arg1 *PartitionGetRequest) (*PartitionObject, error) {
+func (m *MockPartitionServiceServer) GetPartition(arg0 context.Context, arg1 *GetRequest) (*PartitionObject, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPartition", arg0, arg1)
 	ret0, _ := ret[0].(*PartitionObject)
@@ -798,6 +818,21 @@ func (m *MockPartitionServiceServer) GetPartition(arg0 context.Context, arg1 *Pa
 func (mr *MockPartitionServiceServerMockRecorder) GetPartition(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPartition", reflect.TypeOf((*MockPartitionServiceServer)(nil).GetPartition), arg0, arg1)
+}
+
+// GetTenant mocks base method.
+func (m *MockPartitionServiceServer) GetTenant(arg0 context.Context, arg1 *GetRequest) (*TenantObject, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetTenant", arg0, arg1)
+	ret0, _ := ret[0].(*TenantObject)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetTenant indicates an expected call of GetTenant.
+func (mr *MockPartitionServiceServerMockRecorder) GetTenant(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetTenant", reflect.TypeOf((*MockPartitionServiceServer)(nil).GetTenant), arg0, arg1)
 }
 
 // ListAccessRoles mocks base method.

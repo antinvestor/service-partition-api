@@ -128,6 +128,18 @@ func (partCl *PartitionClient) ListTenants(
 	}
 }
 
+// GetTenant Obtains the tenant by the id  supplied.
+func (partCl *PartitionClient) GetTenant(ctx context.Context, tenantId string) (*TenantObject, error) {
+	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
+	defer cancel()
+
+	request := GetRequest{
+		Id: tenantId,
+	}
+
+	return partCl.client.GetTenant(cancelCtx, &request)
+}
+
 // NewTenant used to create a new tenant instance.
 // This is a fairly static and infrequently used option that creates an almost physical data separation
 // To allow the use of same databases in a multitentant fashion.
@@ -194,8 +206,8 @@ func (partCl *PartitionClient) GetPartition(ctx context.Context, partitionId str
 	cancelCtx, cancel := context.WithTimeout(ctx, time.Second*5)
 	defer cancel()
 
-	request := PartitionGetRequest{
-		PartitionId: partitionId,
+	request := GetRequest{
+		Id: partitionId,
 	}
 
 	return partCl.client.GetPartition(cancelCtx, &request)
